@@ -1,0 +1,35 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+dados = pd.read_csv(r"C:\Users\gabri\OneDrive\Área de Trabalho\Dados_atividade_3.csv")
+
+colunas_features = ['mcv', 'alkphos', 'sgpt', 'sgot', 'gammagt']
+coluna_target = 'drinks'
+
+X = dados[colunas_features]
+y = dados[coluna_target]
+
+erros_mlp = []
+
+for c in range(5):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, stratify=y)
+    mlp = MLPClassifier(hidden_layer_sizes=(100, 50), max_iter=1000, activation='logistic', solver='adam')
+    mlp.fit(X_train, y_train)
+    y_pred = mlp.predict(X_test)
+    erro_mlp = 1 - accuracy_score(y_test, y_pred)
+    erros_mlp.append(erro_mlp)
+
+    previsoes = ['menor ou igual a 5', 'maior que 5']
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, fmt='d', cmap='Oranges', xticklabels=previsoes,yticklabels=previsoes)
+    plt.title('Matriz de Confusão - MLP')
+    plt.xlabel('Predição')
+    plt.ylabel('Real')
+    plt.show()
+
+erro_medio_mlp = sum(erros_mlp) / len(erros_mlp)
+print("Erro médio de classificação para a MLP:", erro_medio_mlp)
